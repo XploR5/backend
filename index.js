@@ -1,5 +1,10 @@
-let _ = require('underscore')
+const _ = require('underscore')
 
-let find = _.contains([1, 2, 3], 7)
+const logger = require('./logger')
 
-console.log(find)
+logger.log('Hello World')
+
+console.log(logger.coolAdd(2, 3))
+
+// let find = _.contains([1, 2, 3], 7)
+// console.log(find)
