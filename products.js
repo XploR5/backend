@@ -1,16 +1,28 @@
 const express = require('express')
+const mongoose = require('mongoose')
+
+//express app
 const app = express()
+
 app.use(express.json())
+
+// connect to mongoDB
+const dbURI =
+  'mongodb+srv://test:test%40123@cluster0.qwzp9jd.mongodb.net/Cluster0?retryWrites=true&w=majority'
+
+mongoose
+  .connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then((result) => console.log('connected to db'))
 
 const products = [
   {
-    id:1,
+    id: 1,
     product: 'laptop',
     price: 75,
   },
 
   {
-    id:2,
+    id: 2,
     product: 'phone',
     price: 25,
   },
@@ -22,15 +34,21 @@ const products = [
   },
 
   {
-    id:4,
+    id: 4,
     product: 'charger',
     price: 5,
   },
 
   {
-    id:5,
+    id: 5,
     product: 'mouse',
     price: 1,
+  },
+
+  {
+    id: 6,
+    product: 'car',
+    price: 555,
   },
 ]
 
@@ -45,11 +63,11 @@ app.get('/products/:product', (req, res) => {
   else res.send(product)
 })
 
-app.post('/api/products/add', (req, res) => {
+app.post('/products/add', (req, res) => {
   const prod = {
     id: products.length + 1,
     product: req.body.product,
-    price: req.body.price
+    price: req.body.price,
   }
   products.push(prod)
   res.send(prod)
