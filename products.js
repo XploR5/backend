@@ -12,7 +12,11 @@ const dbURI =
 
 mongoose
   .connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then((result) => console.log('connected to db'))
+  .then((result) => {
+    console.log('connected to Data-Base')
+    app.listen(3000, () => console.log('App is listening on port 3000'))
+  })
+  .catch((err) => console.log(err))
 
 const products = [
   {
@@ -98,5 +102,3 @@ app.delete('/products/delete/:product', (req, res) => {
 
   res.send(product)
 })
-
-app.listen(3000, () => console.log('App is listening on port 3000'))
