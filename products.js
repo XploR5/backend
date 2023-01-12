@@ -68,6 +68,11 @@ app.get('/products/:product', (req, res) => {
 })
 
 app.post('/products/add', (req, res) => {
+  if (!req.body.product || !req.body.price) {
+    res.status(400).send('The product or price is missing.')
+    return
+  }
+
   const prod = {
     id: products.length + 1,
     product: req.body.product,
