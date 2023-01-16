@@ -10,68 +10,15 @@ app.use(express.json())
 
 // connect to mongoDB
 const dbURI =
-  'mongodb+srv://test:test%40123@cluster0.qwzp9jd.mongodb.net/firstDB?retryWrites=true&w=majority'
+  'mongodb+srv://test:test%40123@cluster0.qwzp9jd.mongodb.net/storeProducts?retryWrites=true&w=majority'
 
 mongoose
   .connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((result) => {
-    console.log('connected to Data-Base')
-    app.listen(port, () => console.log(`App is listening on port ${port}}`))
+    console.log('connected to Database')
+    app.listen(port, () => console.log(`App is listening on port ${port}`))
   })
   .catch((err) => console.log(err))
-
-// const products = [
-//   {
-//     id: 1,
-//     product: 'laptop',
-//     price: 75,
-//   },
-
-//   {
-//     id: 2,
-//     product: 'phone',
-//     price: 25,
-//   },
-
-//   {
-//     id: 3,
-//     product: 'earpods',
-//     price: 15,
-//   },
-
-//   {
-//     id: 4,
-//     product: 'charger',
-//     price: 5,
-//   },
-
-//   {
-//     id: 5,
-//     product: 'mouse',
-//     price: 1,
-//   },
-
-//   {
-//     id: 6,
-//     product: 'car',
-//     price: 555,
-//   },
-// ]
-
-app.get('/add-product', (req, res) => {
-  const product = new Product({
-    product: 'super_fast_car',
-    price: 99999,
-  })
-  product
-    .save()
-    .then((result) => {
-      res.send(result)
-    })
-    .catch((err) => {
-      console.log(err)
-    })
-})
 
 app.post('/products/', (req, res) => {
   if (!req.body.product || !req.body.price) {
@@ -91,11 +38,11 @@ app.post('/products/', (req, res) => {
       console.log(err)
     })
 
-  res.send(product)
+  res.send('Successfully added the product. \n' + product)
 })
 
 app.get('/', (req, res) => {
-  res.send('Welcome to CRUDE products')
+  res.send('Welcome to the store.')
 })
 
 app.get('/products', (req, res) => {
@@ -108,35 +55,83 @@ app.get('/products', (req, res) => {
     })
 })
 
-app.get('/products/:product', (req, res) => {
-  const product = products.find((p) => p.product === req.params.product)
-  if (!product)
-    res.status(404).send('The product with the given name was not found.')
-  else res.send(product)
+app.get('/products/:id', (req, res) => {
+
+  if(!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).send('Please enter a valid ID.')
+
+  Product.findById(req.params.id)
+    .then((result) => {
+      if (result === null)
+        return res
+          .status(400)
+          .send('The product with the given ID was not found.')
+      res.send(result)
+    })
+    .catch((err) => {
+      console.log(err)
+    })
 })
 
-app.put('/products/:product', (req, res) => {
-  const product = products.find((p) => p.product === req.params.product)
-  if (!product)
+app.put('/products/:id', (req, res) => {
+
+  if (!mongoose.Types.ObjectId.isValid(req.params.id))
+      return res.status(400).send('Please enter a valid ID.')
+
+  if (!req.body.product || !req.body.price || !req.params.id) {
     return res
-      .status(404)
-      .send('The product with the given name was not found.')
+      .status(400)
+      .send('The product or price is missing.')
+  }
 
-  product.product = req.body.product
-  product.price = req.body.price
+  Product.findById(req.params.id)
+    .then((result) => {
+      if (result === null) {
+        return res
+          .status(400)
+          .send('The product with the given ID was not found.')
+      }
+    })
+    .catch((err) => {
+      console.log(err)
+    })
 
-  res.send(product)
+  Product.findOneAndUpdate(
+    { _id: req.params.id },
+    { $set: { product: req.body.product, price: req.body.price } },
+    { new: true }
+  )
+    .then((result) => {
+      res.send('Product Updated Successfully! \n' + result)
+    })
+    .catch((err) => {
+      console.log(err)
+    })
 })
 
-app.delete('/products/:product', (req, res) => {
-  const product = products.find((p) => p.product === req.params.product)
-  if (!product)
+app.delete('/products/:id', (req, res) => {
+
+  if (!mongoose.Types.ObjectId.isValid(req.params.id) || req.params.id.length !== 24)
+      return res.status(400).send('Please enter a valid ID.')
+
+  if (!req.body.product || !req.body.price || !req.params.id) {
     return res
-      .status(404)
-      .send('The product with the given name was not found.')
+      .status(400)
+      .send('The product id or product or price is missing.')
+  }
 
-  const index = products.indexOf(product)
-  products.splice(index, 1)
+  Product.findById(req.params.id)
+    .then((result) => {
+      if (result === null) {
+        return res
+          .status(400)
+          .send('The product with the given ID was not found.')
+      }
+    })
+    .catch((err) => {
+      console.log(err)
+    })
 
-  res.send(product)
+  Product.findByIdAndDelete(req.params.id).then((result) => {
+    res.send('Product Deleted Successfully! \n' + result)
+  })
 })

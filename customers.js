@@ -23,4 +23,4 @@ app.get('/customer/:name', (req, res) => {
   else res.send(customer)
 })
 
-// app.listen(3000, () => console.log('App is listening on port 3000'))
+app.listen(3000, () => console.log('Customer App is listening on port 3000'))
